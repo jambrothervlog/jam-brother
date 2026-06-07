@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ジャム兄 | Portfolio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 変数定義 (カラースキーム) --- */
+        :root {
+            --main-color: #2C3E50;
+            --accent-color: #E74C3C;
+            --bg-color: #ECF0F1;
+            --text-color: #333333;
+            --card-bg: #FFFFFF;
+            --hero-overlay: rgba(44, 62, 80, 0.7);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --main-color: #ECF0F1;
+            --accent-color: #E74C3C;
+            --bg-color: #1A252F;
+            --text-color: #ECF0F1;
+            --card-bg: #2C3E50;
+            --hero-overlay: rgba(26, 37, 47, 0.85);
+        }
+
+        /* --- リセット & 基本設定 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            transition: var(--transition);
+            overflow-x: hidden;
+        }
+
+        /* --- 編集モード用スタイル --- */
+        .edit-mode-active [contenteditable="true"] {
+            outline: 2px dashed var(--accent-color);
+            padding: 2px 5px;
+            background-color: rgba(231, 76, 60, 0.1);
+        }
+        /* 編集モード中、ヘッダーのリンクの見た目が赤く固定されないように修正 */
+        .edit-mode-active .nav-links [contenteditable="true"] {
+            color: var(--text-color);
+        }
+        
+        .image-upload-wrapper { position: relative; display: inline-block; }
+        .image-overlay-btn {
+            display: none;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .edit-mode-active .image-overlay-btn { display: block; }
+        #imageInput { display: none; }
+
+        /* --- ヘッダー --- */
+        header {
+            position: fixed;
+            top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-logo {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-color);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .ctrl-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-ctrl {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--main-color);
+            padding: 6px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #editBtn { display: none; }
+        #editBtn.secret-show { display: inline-block; }
+        #editBtn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+
+        /* --- セクション共通 --- */
+        section { padding: 120px 8% 80px; max-width: 1200px; margin: 0 auto; }
+        .section-title { font-size: 2.5rem; text-align: center; margin-bottom: 50px; position: relative; color: var(--main-color); }
+        .section-title::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 50px; height: 3px; background-color: var(--accent-color); }
+
+        .fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- 1. ヒーロー --- */
+        #hero {
+            height: 100vh; max-width: 100%;
+            background: linear-gradient(var(--hero-overlay), var(--hero-overlay)), url('https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; color: #ffffff; padding: 0 20px;
+        }
+        #hero h1 { font-size: 3.5rem; margin-bottom: 20px; letter-spacing: 2px; font-weight: 700; }
+        #hero p { font-size: 1.2rem; max-width: 600px; opacity: 0.9; }
+
+        /* --- 2. 自己紹介 --- */
+        .about-container { display: grid; grid-template-columns: 1fr 2fr; gap: 50px; align-items: start; }
+        .about-left { text-align: center; }
+        .profile-img { width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 5px solid var(--card-bg); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+        .about-right h3 { font-size: 1.5rem; margin-bottom: 15px; color: var(--accent-color); }
+        .intro-text { margin-bottom: 30px; font-size: 1.1rem; }
+        
+        .timeline { 
+            border-left: 2px solid var(--main-color); 
+            padding-left: 20px; 
+            transition: var(--transition);
+        }
+        
+        .timeline-item { position: relative; margin-bottom: 25px; }
+        .timeline-item::before { content: ''; position: absolute; left: -27px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-color); }
+        .year { font-weight: bold; color: var(--accent-color); display: block; }
+        
+        .meta-info { 
+            margin-top: 40px; 
+            background: transparent; 
+            box-shadow: none;        
+            padding-left: 0;    
+            border-left: none;  
+        }
+        .meta-item { margin-bottom: 20px; }
+        .meta-label { font-weight: bold; color: var(--accent-color); display: block; margin-bottom: 3px; }
+
+        /* --- 3. SNS --- */
+        #sns { background-color: var(--card-bg); text-align: center; max-width: 100%; transition: var(--transition); }
+        .sns-icons { display: flex; justify-content: center; gap: 40px; margin-top: 30px; }
+        .sns-icons a { color: var(--text-color); font-size: 3rem; transition: var(--transition); }
+        .sns-icons a:hover { color: var(--accent-color); transform: scale(1.1); }
+
+        /* --- 4. お問い合わせ --- */
+        .contact-desc { text-align: center; margin-bottom: 40px; }
+        .contact-form { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; background: var(--bg-color); color: var(--text-color); font-size: 1rem; }
+        .btn-submit { background: var(--main-color); color: #fff; border: none; padding: 14px 30px; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; width: 100%; transition: var(--transition); }
+        .btn-submit:hover { background: var(--accent-color); }
+
+        #adminEmailConfig { display: none; max-width: 600px; margin: 30px auto 0; padding: 20px; background: #FFF9E6; border: 2px dashed #F1C40F; border-radius: 8px; color: #333; }
+        .edit-mode-active #adminEmailConfig { display: block; }
+
+        footer { text-align: center; padding: 30px; font-size: 0.9rem; opacity: 0.7; }
+        #secretTrigger { cursor: default; user-select: none; }
+
+        @media (max-width: 768px) {
+            header { padding: 10px 4%; flex-direction: column; gap: 10px; text-align: center; }
+            .header-right { flex-direction: column; gap: 10px; width: 100%; }
+            .nav-links { justify-content: center; font-size: 0.9rem; }
+            #hero h1 { font-size: 2.2rem; }
+            #hero p { font-size: 1rem; }
+            .about-container { grid-template-columns: 1fr; gap: 30px; }
+            .profile-img { width: 150px; height: 150px; }
+            section { padding: 140px 5% 60px; }
+            .sns-icons { gap: 25px; }
+            .contact-form { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <!-- ロゴも壊れないように span 構造を分離 -->
+        <a href="#" class="header-logo"><span id="siteLogo" contenteditable="false">ジャム兄</span></a>
+        
+        <div class="header-right">
+            <!-- リンクタグ（a）の内側のテキストだけを編集できるように構造を最適化 -->
+            <ul class="nav-links">
+                <li><a href="#"><span id="navHome" contenteditable="false">Home</span></a></li>
+                <li><a href="works.html"><span id="navWorks" contenteditable="false">Works</span></a></li>
+                <li><a href="#sns"><span id="navBlog" contenteditable="false">Blog</span></a></li>
+                <li><a href="#contact"><span id="navContact" contenteditable="false">Contact</span></a></li>
+            </ul>
+
+            <div class="ctrl-buttons">
+                <button class="btn-ctrl" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="btn-ctrl" id="editBtn"><i class="fas fa-edit"></i> 編集モードON</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 1. ヒーローセクション -->
+    <section id="hero">
+        <h1 id="heroTitle" contenteditable="false">人生の選択肢を増やそう</h1>
+        <p id="heroSub" contenteditable="false">今の自分にできることを一つずつ積み重ね、もっと自由に、自分らしく生きるために。</p>
+    </section>
+
+    <!-- 2. 自己紹介セクション -->
+    <section id="about" class="fade-in">
+        <h2 class="section-title">Who I Am</h2>
+        <div class="about-container">
+            <div class="about-left">
+                <div class="image-upload-wrapper">
+                    <img id="profileImg" class="profile-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" alt="プロフィール画像">
+                    <label for="imageInput" class="image-overlay-btn"><i class="fas fa-camera"></i> 変更</label>
+                    <input type="file" id="imageInput" accept="image/*">
+                </div>
+            </div>
+            <div class="about-right">
+                <div id="aboutMainText" contenteditable="false">
+                    <h3>はじめまして、ジャム兄と申します。</h3>
+                    <p class="intro-text">会社員として働きつつ朝活・学び・副業といった様々な挑戦を発信しています。</p>
+                </div>
+                
+                <div id="aboutTimeline" contenteditable="false">
+                    <div class="timeline">
+                        <div class="timeline-item"><span class="year">1996年生まれ</span><p>中学からテニス部で活動。大学は食品（理系）を専攻しつつ、体育会テニス部に所属し、卒業まで文武両道を貫く。</p></div>
+                        <div class="timeline-item"><span class="year">2019年</span><p>新卒で大手食品メーカー（プライム上場）に就職。鬱になりかけて休職を経験するも、約5年半勤める。</p></div>
+                        <div class="timeline-item"><span class="year">2021年</span><p>初めてYouTubeに動画を投稿。</p></div>
+                        <div class="timeline-item"><span class="year">2024年</span><p>転職。憧れだった食品メーカーの研究開発職として入社。</p></div>
+                        <div class="timeline-item"><span class="year">2025年</span><p>初めて自身のYouTubeチャンネルに起業案件が来る。</p></div>
+                        <div class="timeline-item"><span class="year">2026年</span><p>副業として、依頼を受けてYouTubeチャンネル用の動画編集に挑戦。そして再度転職。管理部門の仕事に挑戦。</p></div>
+                    </div>
+                </div>
+
+                <div class="meta-info" id="aboutMeta" contenteditable="false">
+                    <div class="meta-item">
+                        <span class="meta-label">保有資格</span>
+                        <p>食品衛生責任者、2級パン製造技能士、一般毒物劇物取扱者、簿記2級</p>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">趣味</span>
+                        <p>鉄道（乗り鉄・音鉄・模型鉄）、カフェ、スポーツ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. SNSリンク -->
+    <section id="sns" class="fade-in">
+        <h2 class="section-title">SNS Links</h2>
+        <div class="sns-icons">
+            <a href="https://x.com" target="_blank" aria-label="X (Twitter)"><i class="fab fa-twitter"></i></a>
+            <a href="https://www.youtube.com/@%E3%82%B8%E3%83%A3%E3%83%A0%E5%85%84vlog" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+    </section>
+
+    <!-- 5. お問い合わせセクション -->
+    <section id="contact" class="fade-in">
+        <h2 class="section-title">Get In Touch</h2>
+        <p class="contact-desc" id="contactDesc" contenteditable="false">制作のご依頼、お見積もり、その他ご相談はお気軽にどうぞ。</p>
+        
+        <form class="contact-form" id="contactForm" action="#" method="POST">
+            <div class="form-group"><label for="name">お名前</label><input type="text" id="name" required placeholder="山田 太郎"></div>
+            <div class="form-group"><label for="email">メールアドレス</label><input type="email" id="email" required placeholder="example@email.com"></div>
+            <div class="form-group"><label for="message">お問い合わせ内容</label><textarea id="message" rows="5" required placeholder="ご自由にご記入ください"></textarea></div>
+            <button type="submit" class="btn-submit">送信する</button>
+        </form>
+
+        <div id="adminEmailConfig">
+            <label style="font-weight: bold; display: block; margin-bottom: 5px;">【編集用】問い合わせ通知先メールアドレス:</label>
+            <input type="email" id="adminEmailInput" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="your-email@example.com">
+        </div>
+    </section>
+
+    <footer>
+        <p id="secretTrigger">&copy; 2026 ジャム兄. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        const ADMIN_PASSWORD = "jam-brother2026"; 
+
+        /* --- 1. ダークモード切り替え --- */
+        const themeToggle = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        themeToggle.addEventListener('click', () => {
+            let theme = document.documentElement.getAttribute('data-theme');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        });
+
+        /* --- 2. スクロールアニメーション --- */
+        const faders = document.querySelectorAll('.fade-in');
+        const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('visible');
+                appearOnScroll.unobserve(entry.target);
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+        faders.forEach(fader => appearOnScroll.observe(fader));
+
+        /* --- 3. 隠しコマンド判定 --- */
+        const secretTrigger = document.getElementById('secretTrigger');
+        const editBtn = document.getElementById('editBtn');
+        let clickCount = 0;
+
+        secretTrigger.addEventListener('click', () => {
+            clickCount++;
+            if (clickCount === 3) {
+                const inputPass = prompt("管理者パスワードを入力してください:");
+                if (inputPass === ADMIN_PASSWORD) {
+                    alert("認証成功。編集ボタンを表示します。");
+                    editBtn.classList.add('secret-show');
+                } else {
+                    alert("パスワードが違います。");
+                }
+                clickCount = 0;
+            }
+            setTimeout(() => { clickCount = 0; }, 3000);
+        });
+
+        /* --- 4. 編集機能 & 保存 (保存対象を個別の文字IDに変更) --- */
+        const editableElements = [
+            'siteLogo', 'navHome', 'navWorks', 'navBlog', 'navContact', 
+            'heroTitle', 'heroSub', 'aboutMainText', 'aboutTimeline', 'aboutMeta', 'contactDesc'
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            editableElements.forEach(id => {
+                const savedContent = localStorage.getItem(id);
+                if (savedContent) document.getElementById(id).innerHTML = savedContent;
+            });
+            const savedImg = localStorage.getItem('profileImgData');
+            if (savedImg) document.getElementById('profileImg').src = savedImg;
+            const savedEmail = localStorage.getItem('adminEmail');
+            if (savedEmail) {
+                document.getElementById('adminEmailInput').value = savedEmail;
+                updateFormAction(savedEmail);
+            }
+        });
+
+        let isEditMode = false;
+        editBtn.addEventListener('click', () => {
+            isEditMode = !isEditMode;
+            if (isEditMode) {
+                document.body.classList.add('edit-mode-active');
+                editBtn.innerHTML = '<i class="fas fa-save"></i> 保存';
+                editBtn.classList.add('active');
+                editableElements.forEach(id => {
+                    document.getElementById(id).setAttribute('contenteditable', 'true');
+                });
+            } else {
+                editableElements.forEach(id => {
+                    const el = document.getElementById(id);
+                    el.setAttribute('contenteditable', 'false');
+                    localStorage.setItem(id, el.innerHTML);
+                });
+                const emailVal = document.getElementById('adminEmailInput').value;
+                localStorage.setItem('adminEmail', emailVal);
+                updateFormAction(emailVal);
+
+                document.body.classList.remove('edit-mode-active');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i> 編集モードON';
+                editBtn.classList.remove('active');
+                editBtn.classList.remove('secret-show');
+                alert('変更を安全に保存し、編集ボタンを隠しました。');
+            }
+        });
+
+        /* --- 5. 画像アップロード --- */
+        const imageInput = document.getElementById('imageInput');
+        const profileImg = document.getElementById('profileImg');
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.addEventListener('load', function() {
+                    profileImg.src = this.result;
+                    localStorage.setItem('profileImgData', this.result);
+                });
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function updateFormAction(email) {
+            const form = document.getElementById('contactForm');
+            form.action = email ? `mailto:${email}` : "#";
+        }
+    </script>
+</body>
+</html>
