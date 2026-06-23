@@ -44,7 +44,6 @@
             padding: 2px 5px;
             background-color: rgba(231, 76, 60, 0.1);
         }
-        /* 編集モード中、ヘッダーのリンクの見た目が赤く固定されないように修正 */
         .edit-mode-active .nav-links [contenteditable="true"] {
             color: var(--text-color);
         }
@@ -187,6 +186,8 @@
         .contact-form { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        
+        /* 入力欄（未入力でも即起動できるようrequired属性を除去したデザイン） */
         .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; background: var(--bg-color); color: var(--text-color); font-size: 1rem; }
         .btn-submit { background: var(--main-color); color: #fff; border: none; padding: 14px 30px; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: bold; width: 100%; transition: var(--transition); }
         .btn-submit:hover { background: var(--accent-color); }
@@ -214,11 +215,9 @@
 <body>
 
     <header>
-        <!-- ロゴも壊れないように span 構造を分離 -->
         <a href="#" class="header-logo"><span id="siteLogo" contenteditable="false">ジャム兄</span></a>
         
         <div class="header-right">
-            <!-- リンクタグ（a）の内側のテキストだけを編集できるように構造を最適化 -->
             <ul class="nav-links">
                 <li><a href="#"><span id="navHome" contenteditable="false">Home</span></a></li>
                 <li><a href="works.html"><span id="navWorks" contenteditable="false">Works</span></a></li>
@@ -233,13 +232,11 @@
         </div>
     </header>
 
-    <!-- 1. ヒーローセクション -->
     <section id="hero">
         <h1 id="heroTitle" contenteditable="false">人生の選択肢を増やそう</h1>
         <p id="heroSub" contenteditable="false">今の自分にできることを一つずつ積み重ね、もっと自由に、自分らしく生きるために。</p>
     </section>
 
-    <!-- 2. 自己紹介セクション -->
     <section id="about" class="fade-in">
         <h2 class="section-title">Who I Am</h2>
         <div class="about-container">
@@ -281,24 +278,22 @@
         </div>
     </section>
 
-    <!-- 3. SNSリンク -->
     <section id="sns" class="fade-in">
         <h2 class="section-title">SNS Links</h2>
         <div class="sns-icons">
-            <a href="https://x.com" target="_blank" aria-label="X (Twitter)"><i class="fab fa-twitter"></i></a>
+            <a href="https://x.com" target="_blank" aria-label="X (Twitter)"><i class="fab fa-x-twitter"></i></a>
             <a href="https://www.youtube.com/@%E3%82%B8%E3%83%A3%E3%83%A0%E5%85%84vlog" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
         </div>
     </section>
 
-    <!-- 5. お問い合わせセクション -->
     <section id="contact" class="fade-in">
         <h2 class="section-title">Get In Touch</h2>
         <p class="contact-desc" id="contactDesc" contenteditable="false">お仕事のご依頼、その他ご相談はお気軽にどうぞ。</p>
         
         <form class="contact-form" id="contactForm" action="#" method="POST">
-             <div class="form-group"><label for="name">お名前</label><input type="text" id="name" required placeholder="山田 太郎"></div>
-            <div class="form-group"><label for="email">メールアドレス</label><input type="email" id="email" required placeholder="example@email.com"></div>
-            <div class="form-group"><label for="message">お問い合わせ内容</label><textarea id="message" rows="5" required placeholder="ご自由にご記入ください"></textarea></div>
+             <div class="form-group"><label for="name">お名前</label><input type="text" id="name" placeholder="（未入力でもOKです）"></div>
+            <div class="form-group"><label for="email">メールアドレス</label><input type="email" id="email" placeholder="（未入力でもOKです）"></div>
+            <div class="form-group"><label for="message">お問い合わせ内容</label><textarea id="message" rows="5" placeholder="こちらに用件を書くか、空欄のまま下のボタンを押してメールアプリ側で自由にご記入ください。"></textarea></div>
             <button type="submit" class="btn-submit">メールアプリを起動して送信</button>
         </form>
 
@@ -366,7 +361,7 @@
             setTimeout(() => { clickCount = 0; }, 3000);
         });
 
-        /* --- 4. 編集機能 & 保存 (保存対象を個別の文字IDに変更) --- */
+        /* --- 4. 編集機能 & 保存 --- */
         const editableElements = [
             'siteLogo', 'navHome', 'navWorks', 'navBlog', 'navContact', 
             'heroTitle', 'heroSub', 'aboutMainText', 'aboutTimeline', 'aboutMeta', 'contactDesc'
@@ -382,7 +377,6 @@
             const savedEmail = localStorage.getItem('adminEmail');
             if (savedEmail) {
                 document.getElementById('adminEmailInput').value = savedEmail;
-                updateFormAction(savedEmail);
             }
         });
 
@@ -404,7 +398,6 @@
                 });
                 const emailVal = document.getElementById('adminEmailInput').value;
                 localStorage.setItem('adminEmail', emailVal);
-                updateFormAction(emailVal);
 
                 document.body.classList.remove('edit-mode-active');
                 editBtn.innerHTML = '<i class="fas fa-edit"></i> 編集モードON';
@@ -414,7 +407,55 @@
             }
         });
 
-        /* --- 5. 画像アップロード --- */
+        /* --- 5. 安全なメール送信＆アプリ起動制御（空欄＆エラー対策版） --- */
+        const contactForm = document.getElementById('contactForm');
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // フォーム本来の画面遷移（エラー発生源）を完全にシャットアウト
+
+            const adminEmail = localStorage.getItem('adminEmail') || document.getElementById('adminEmailInput').value;
+            if (!adminEmail) {
+                alert('通知先メールアドレスが設定されていません。編集モードから設定してください。');
+                return;
+            }
+
+            const name = document.getElementById('name').value;
+            const userEmail = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            // 空欄対応型の件名
+            let subjectText = "【ポートフォリオ】お問い合わせ";
+            if (name) subjectText += `: ${name}様`;
+            const subject = encodeURIComponent(subjectText);
+
+            // 空欄対応型の本文
+            let bodyText = "";
+            if (name) bodyText += `お名前: ${name}\n`;
+            if (userEmail) bodyText += `メールアドレス: ${userEmail}\n`;
+            if (name || userEmail) bodyText += `\n`;
+            
+            bodyText += `【お問い合わせ内容】\n`;
+            bodyText += message ? message : `（ここに用件をご記入ください）`;
+
+            const body = encodeURIComponent(bodyText);
+            const mailtoUrl = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
+            
+            // 安全なクリックダミーを生成してブラウザのセキュリティを回避
+            const tempLink = document.createElement('a');
+            tempLink.href = mailtoUrl;
+            tempLink.style.display = 'none';
+            document.body.appendChild(tempLink);
+            tempLink.click();
+            document.body.removeChild(tempLink);
+
+            // アプリ未環境対策の案内ポップアップ
+            setTimeout(() => {
+                if (confirm('メールアプリは無事に起動しましたか？\nもし起動しない、またはエラーになる場合は、お手数ですが下記のアドレスをコピーして直接メールをお送りください。\n\n宛先: ' + adminEmail)) {
+                    contactForm.reset();
+                }
+            }, 1200);
+        });
+
+        /* --- 6. 画像アップロード --- */
         const imageInput = document.getElementById('imageInput');
         const profileImg = document.getElementById('profileImg');
         imageInput.addEventListener('change', function() {
@@ -428,11 +469,6 @@
                 reader.readAsDataURL(file);
             }
         });
-
-        function updateFormAction(email) {
-            const form = document.getElementById('contactForm');
-            form.action = email ? `mailto:${email}` : "#";
-        }
     </script>
 </body>
 </html>
