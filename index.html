@@ -242,7 +242,8 @@
         <div class="about-container">
             <div class="about-left">
                 <div class="image-upload-wrapper">
-                    <img id="profileImg" class="profile-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" alt="プロフィール画像">
+                    <!-- 画像のパスを添付されたファイル名に変更しました -->
+                    <img id="profileImg" class="profile-img" src="IMG_7295 2.PNG" alt="プロフィール画像">
                     <label for="imageInput" class="image-overlay-btn"><i class="fas fa-camera"></i> 変更</label>
                     <input type="file" id="imageInput" accept="image/*">
                 </div>
@@ -255,12 +256,12 @@
                 
                 <div id="aboutTimeline" contenteditable="false">
                     <div class="timeline">
-                        <div class="timeline-item"><span class="year">1996年生まれ</span><p>中学からテニス部で活動。大学は食品（理系）を専攻しつつ、体育会テニス部に所属し、卒業まで文武両道を貫く。</p></div>
-                        <div class="timeline-item"><span class="year">2019年</span><p>新卒で大手食品メーカー（プライム上場）に就職。鬱になりかけて休職を経験するも、約5年半勤める。</p></div>
-                        <div class="timeline-item"><span class="year">2021年</span><p>初めてYouTubeに動画を投稿。</p></div>
-                        <div class="timeline-item"><span class="year">2024年</span><p>転職。憧れだった食品メーカーの研究開発職として入社。</p></div>
-                        <div class="timeline-item"><span class="year">2025年</span><p>初めて自身のYouTubeチャンネルに起業案件が来る。</p></div>
-                        <div class="timeline-item"><span class="year">2026年</span><p>副業として、依頼を受けてYouTubeチャンネル用の動画編集に挑戦。そして再度転職。管理部門の仕事に挑戦。</p></div>
+                        <div class="timeline-item"><span class="year">1996年生まれ</span><p>中学からテニス部で活動. 大学は食品（理系）を専攻しつつ、体育会テニス部に所属し、卒業まで文武両道を貫く.</p></div>
+                        <div class="timeline-item"><span class="year">2019年</span><p>新卒で大手食品メーカー（プライム上場）に就職. 鬱になりかけて休職を経験するも、約5年半勤める.</p></div>
+                        <div class="timeline-item"><span class="year">2021年</span><p>初めてYouTubeに動画を投稿.</p></div>
+                        <div class="timeline-item"><span class="year">2024年</span><p>転職. 憧れだった食品メーカーの研究開発職として入社.</p></div>
+                        <div class="timeline-item"><span class="year">2025年</span><p>初めて自身のYouTubeチャンネルに起業案件が来る.</p></div>
+                        <div class="timeline-item"><span class="year">2026年</span><p>副業として、依頼を受けてYouTubeチャンネル用の動画編集に挑戦. そして再度転職. 管理部門の仕事に挑戦.</p></div>
                     </div>
                 </div>
 
@@ -277,8 +278,9 @@
             </div>
         </div>
     </section>
+
 <!-- 3. SNSリンク -->
-    <section id="sns" class="fade-in">
+   <section id="sns" class="fade-in">
         <h2 class="section-title">SNS Links</h2>
         <div class="sns-icons">
             <a href="https://x.com/purehoney1227?s=21" target="_blank" aria-label="Twitter"><i class="fab fa-x"></i></a>
@@ -351,10 +353,10 @@
             if (clickCount === 3) {
                 const inputPass = prompt("管理者パスワードを入力してください:");
                 if (inputPass === ADMIN_PASSWORD) {
-                    alert("認証成功。編集ボタンを表示します。");
+                    alert("認証成功. 編集ボタンを表示します.");
                     editBtn.classList.add('secret-show');
                 } else {
-                    alert("パスワードが違います。");
+                    alert("パスワードが違います.");
                 }
                 clickCount = 0;
             }
@@ -403,7 +405,7 @@
                 editBtn.innerHTML = '<i class="fas fa-edit"></i> 編集モードON';
                 editBtn.classList.remove('active');
                 editBtn.classList.remove('secret-show');
-                alert('変更を安全に保存し、編集ボタンを隠しました。');
+                alert('変更を安全に保存し、編集ボタンを隠しました.');
             }
         });
 
@@ -414,7 +416,7 @@
 
             const adminEmail = localStorage.getItem('adminEmail') || document.getElementById('adminEmailInput').value;
             if (!adminEmail) {
-                alert('通知先メールアドレスが設定されていません。編集モードから設定してください。');
+                alert('通知先メールアドレスが設定されていません. 編集モードから設定してください.');
                 return;
             }
 
@@ -449,7 +451,7 @@
 
             // アプリ未環境対策の案内ポップアップ
             setTimeout(() => {
-                if (confirm('メールアプリは無事に起動しましたか？\nもし起動しない、またはエラーになる場合は、お手数ですが下記のアドレスをコピーして直接メールをお送りください。\n\n宛先: ' + adminEmail)) {
+                if (confirm('メールアプリは無事に起動しましたか？\nもし起動しない、またはエラーになる場合は、お手数ですが下記のアドレスをコピーして直接メールをお送りください.\n\n宛先: ' + adminEmail)) {
                     contactForm.reset();
                 }
             }, 1200);
